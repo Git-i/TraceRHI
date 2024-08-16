@@ -31,7 +31,7 @@ TraceRHI::Context::Context
 }
 TraceRHI::Context::~Context()
 {
-    TracyVkDestroy((tracy::VkCtx*)ID);
+    if(ID) TracyVkDestroy((tracy::VkCtx*)ID);
 }
 
 TraceRHI::Zone::Zone(
