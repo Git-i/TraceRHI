@@ -1,11 +1,9 @@
-#define VK_NO_PROTOTYPES
-#include "include/TraceRHI.h"
-#include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
-#include "CommandList.h"
-#include "FormatsAndTypes.h"
+#define VK_NO_PROTOTYPES
+#define TRACY_VK_USE_SYMBOL_TABLE
+#include "TraceRHI.h"
+#include <vulkan/vulkan.h>
 #include "Instance.h"
-#include "Ptr.h"
 #include "tracy/TracyVulkan.hpp"
 #if _WIN32
 
@@ -21,19 +19,25 @@ TraceRHI::Context::Context
     if(api == RHI::API::Vulkan)
     {
         ID = TracyVkContext(
+            (VkInstance)instance->ID,
             (VkPhysicalDevice)physicalDev->ID,
             (VkDevice)device->ID,
             (VkQueue)queue->ID,
-            (VkCommandBuffer)list->ID);
+            (VkCommandBuffer)list->ID,
+            vkGetInstanceProcAddr, vkGetDeviceProcAddr);
     }
     else {
     }
+}
+TraceRHI::Context::~Context()
+{
+    TracyVkDestroy((tracy::VkCtx*)ID);
 }
 
 TraceRHI::Zone::Zone(
     Context& ctx, 
     RHI::Weak<RHI::GraphicsCommandList> list, 
-    tracy::SourceLocationData* loc_d
+    const tracy::SourceLocationData* loc_d
 )
 {
     if(ctx.api == RHI::API::Vulkan)
